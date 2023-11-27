@@ -1,0 +1,4 @@
+/bert_finetuned_ner/*
+/data/*
+/exp/*
+/output/*
