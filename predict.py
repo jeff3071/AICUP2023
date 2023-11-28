@@ -61,7 +61,7 @@ def post_process(file_name, sentence, token):
                 
             correct_IDNUM = IDNUM[correct_start_idx:correct_end_idx+1]
             
-            if correct_IDNUM != '':
+            if correct_IDNUM != '' and len(correct_IDNUM) >= 8:
                 temp_list.append(f"{file_name}\t{token['entity_group']}\t{start_idx+correct_start_idx}\t{start_idx+correct_start_idx+len(correct_IDNUM)}\t{correct_IDNUM}\n")
             start_idx += start_idx+correct_start_idx+len(correct_IDNUM) + 1
             

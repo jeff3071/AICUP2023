@@ -1,5 +1,10 @@
 # AICUP 2023 - Electronic Medical Record PHI Extraction
 
+## Environment
+
+- OS: Ubuntu 20.04
+- Python 3.8.5
+- GPU: RTX 3060
 
 ## Install
 

@@ -69,8 +69,7 @@ def time_convert_to_iso_format(time_str):
         "%d.%m.%y @ %I.%M%p",
         "%I:%M%p on %d.%m.%y",
         "%H.%M on %d/%m/%y",
-        "%H:%Mpm on %d/%m/%y",
-        "%H:%Mam on %d/%m/%y",
+        "%I:%M%p on %d/%m/%y",
         "%d.%m.%Y at %H:%M",
         "%d/%m/%Y at %I:%M%p",
         "%Y-%m-%dT%H:%M",
@@ -86,13 +85,21 @@ def time_convert_to_iso_format(time_str):
         "%I:%M%p on %d.%m.%y",
         "%I:%M on %d.%m.%Y",
         "%H:%M on %d.%m.%y",
-        "%H:%M%p on %d.%m.%y",
+        "%I:%M%p on %d.%m.%y",
         "%I.%M%p on %d/%m/%y",
         "%I.%M%p on %d.%m.%y",
-        "%d/%m/%y at %H.%M%p",
-        "%d/%m/%y at %H:%M%p",
-        "%d.%m.%y at %H.%M%p",
-        "%d.%m.%y at %H:%M%p"
+        "%d/%m/%y at %I.%M%p",
+        "%d/%m/%y at %I:%M%p",
+        "%d.%m.%y at %I.%M%p",
+        "%d.%m.%y at %I:%M%p",
+        "%d.%m.%Y at %I.%M%p",
+        "%H.%M%p on %d/%m/%y",
+        "%H:%M%p on %d/%m/%y",
+        "%d/%m/%Y at %H:%M%p",
+        "%H:%M%p on %d.%m.%y",
+        "%d.%m.%Y at %H.%M%p",
+        "%H.%M%p on %d.%m.%y",
+        "%d.%m.%Y at %H:%M%p",
     ]
 
     for fmt in formats:
@@ -128,6 +135,8 @@ def extract_time_strings(file_name, article):
         r"(\d{1,2}/\d{1,2}/\d{2,4} at \d{1,2}.\d{2}[ap]m)",
         r"(\d{1,2}/\d{1,2}/\d{2,4} at \d{1,2}:\d{2}[ap]m)",
         r"(\d{2}:\d{2} on \d{2}/\d{2}/\d{2})",
+        r"(\d{2}:\d{2} on the \d{2}/\d{2}/\d{2})",
+        r"(\d{2}:\d{2}\s+[ap]m on the \d{2}/\d{2}/\d{2})",
     ]
 
     extracted_times = []
@@ -300,6 +309,9 @@ def extract_patient(file_name, medicalrecord_list, article):
             while i < len(sentence_list):
                 if sentence_list[i+1] != "":
                     patient = sentence_list[i+1].strip()
+                    if patient == "SpecimenType":
+                        break
+                    
                     if patient and len(patient) > 0 and check_words_capitalization(patient):
                         patient_index = article.find(patient)
                         patient_string = f"{file_name}\tPATIENT\t{patient_index}\t{patient_index+len(patient)}\t{patient}\n"
@@ -439,7 +451,7 @@ def extract_duration(file_name, sentence):
         if unit.lower().startswith('hour'):
             converted_durations.append((origin_duration, f'P{duration}H'))
         elif unit.lower().startswith('minute'):
-            converted_durations.append((origin_duration, f'P{duration}M'))
+            converted_durations.append((origin_duration, f'PT{duration}M'))
         elif unit.lower().startswith('day'):
             converted_durations.append((origin_duration, f'P{duration}D'))
         elif unit.lower().startswith('week') or unit.lower().startswith('wk'):
@@ -456,4 +468,17 @@ def extract_duration(file_name, sentence):
         duration_string = f"{file_name}\tDURATION\t{duration_index}\t{duration_index+len(duration)}\t{duration}\t{converted_duration}\n"
         result.append(duration_string)
             
+    return result
+
+def extract_set(file_name, sentence):
+    pattern = r'tested (\w*) with'
+    
+    matches = re.finditer(pattern, sentence)
+    result = []
+    for match in matches:
+        set_name = match.group(1)
+        set_name_index = match.start(1)
+        set_string = f"{file_name}\tSET\t{set_name_index}\t{set_name_index+len(set_name)}\t{set_name}\n"
+        result.append(set_string)
+        
     return result
