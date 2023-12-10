@@ -13,7 +13,10 @@ from utils import (
     extract_location_other,
     extract_street_city_state,
     extract_organization,
-    extract_duration
+    extract_duration,
+    extract_url,
+    extract_country,
+    extract_set
 )
 
 model_path = "./bert_finetuned_ner/checkpoint_12873/"
@@ -149,10 +152,14 @@ def predict(file_name, sentence):
             if temp_idx < zip_idx:
                 idnum_idx = temp_idx
     
-    file_predict += extract_patient(file_name, medicalrecord_list, sentence)
+    if medicalrecord_list != []:
+        file_predict += extract_patient(file_name, medicalrecord_list, sentence)
     file_predict += extract_organization(file_name, sentence)
     
     file_predict += extract_location_other(file_name, sentence)
+    file_predict += extract_url(file_name, sentence)
+    file_predict += extract_country(file_name, sentence)
+    file_predict += extract_set(file_name, sentence)
     
     if zip_idx > idnum_idx:
         street_city_state = extract_street_city_state(file_name, sentence, idnum_idx, zip_idx)
@@ -173,7 +180,7 @@ def predict(file_name, sentence):
     
     return file_predict
 
-file_list = glob.glob("./data/First_Phase_Release/Validation_Release/" + '*')
+file_list = glob.glob("./data/opendid_test/opendid_test/" + '*')
 
 final_result = []
 

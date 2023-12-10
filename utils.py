@@ -1,6 +1,9 @@
 import re
 from datetime import datetime
 from collections import defaultdict
+import pycountry
+import nltk
+nltk.download('punkt')
 
 def find_all_positions(string, sub):
     return [i for i in range(len(string)) if string.startswith(sub, i)]
@@ -153,6 +156,11 @@ def extract_time_strings(file_name, article):
             # if converted_time:
             start_index = match.start()
             end_index = match.end()
+            
+            if article[end_index:end_index+2] == "hr":
+                time_str += "hr"
+                end_index += 2
+            
             ans_string =f"{file_name}\tTIME\t{start_index}\t{end_index}\t{time_str}\t{converted_time}\n"
             
             if str(start_index) not in time_hash:
@@ -478,7 +486,34 @@ def extract_set(file_name, sentence):
     for match in matches:
         set_name = match.group(1)
         set_name_index = match.start(1)
-        set_string = f"{file_name}\tSET\t{set_name_index}\t{set_name_index+len(set_name)}\t{set_name}\n"
+        if set_name == "twice":
+            normal_set = "R2"
+        set_string = f"{file_name}\tSET\t{set_name_index}\t{set_name_index+len(set_name)}\t{set_name}\t{normal_set}\n"
         result.append(set_string)
         
     return result
+
+def extract_url(file_name, text): 
+    urls = []
+    pattern = r'\bhttps?://\S+\b'
+    matches = re.finditer(pattern,text)
+    for url in matches:
+        start = url.start()
+        urls.append(f"{file_name}\tURL\t{start}\t{start+len(url.group())}\t{url.group()}\n")
+    return urls
+
+
+def extract_country(filename, text):
+    countries=[]
+    tokens = [word for word in nltk.word_tokenize(text)]
+    for token in tokens:
+        try:
+            c = pycountry.countries.lookup(token).name
+            if token==c:
+                match = re.finditer(token,text)
+                for m in match:
+                    countries.append(f'{filename}\tCOUNTRY\t{m.start()}\t{m.start()+len(token)}\t{token}\n')
+
+        except LookupError:
+            pass
+    return countries

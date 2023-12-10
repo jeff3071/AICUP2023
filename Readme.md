@@ -54,6 +54,9 @@ bert_finetuned_ner
 └── checkpoint_8583
 ```
 
+You can also download the pretrained model from [here](https://drive.google.com/drive/folders/1_jzEAjbZou-B-9bUfFasIk4kCfLOk2NB?usp=sharing).
+> Please put the pretrained model in the `bert_finetuned_ner` folder.
+
 ## Inference
 
 ```bash
